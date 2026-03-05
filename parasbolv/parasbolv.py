@@ -1046,10 +1046,29 @@ def draw_interaction (ax,
                    sending_bounds[0][1] + (sending_bounds[1][1] - sending_bounds[0][1])/2)
     end_cent = (receiving_bounds[0][0] + (receiving_bounds[1][0] - receiving_bounds[0][0])/2,
                 receiving_bounds[0][1] + (receiving_bounds[1][1] - receiving_bounds[0][1])/2)
+    
+    # TO DRAW BACKWARD INTERACTIONS ON THE OPPOSITE SIDE, FLIP THE SIGN OF THE DISTANCE FROM BASELINE AND PAD SIZE
+    # Determine signed distance along the axis of 
+    # the interaction between centroids to determine 
+    # which side of the receiving glyph the interaction should be drawn on
+    # Rotation is currently degrees here
+    rot_rad = rotation * pi/180.0
+    axis_x = cos(rot_rad)
+    axis_y = sin(rot_rad)
+    dx = end_cent[0] - origin_cent[0]
+    dy = end_cent[1] - origin_cent[1]
+
+    # signed distance along construct axis
+    delta_along = dx*axis_x + dy*axis_y
+
+    sign = 1.0 if delta_along >= 0 else -1.0
+    centroid_distance = abs(delta_along)
+    
     # Determine distance between centroids
-    x_distance = abs(origin_cent[0] - end_cent[0])
-    y_distance = abs(origin_cent[1] - end_cent[1])
-    centroid_distance = sqrt(x_distance**2 + y_distance**2)
+    #x_distance = abs(origin_cent[0] - end_cent[0])
+    #y_distance = abs(origin_cent[1] - end_cent[1])
+    #centroid_distance = sqrt(x_distance**2 + y_distance**2)
+
     # Determine interaction origin
     rotation = rotation % 360
     bearing = 360 - rotation
@@ -1059,8 +1078,10 @@ def draw_interaction (ax,
     int_origin_max = (int_origin_x + (y_pad+parameters['sending_length_skew'])*sin(bearing * pi/180),
                       int_origin_y + (y_pad+parameters['sending_length_skew'])*cos(bearing * pi/180))
     # Determine end max
-    int_end_max = (int_origin_max[0] + centroid_distance*sin((90 - rotation) * pi/180),
-                   int_origin_max[1] + centroid_distance*cos((90 - rotation) * pi/180))
+    #int_end_max = (int_origin_max[0] + centroid_distance*sin((90 - rotation) * pi/180),
+    #               int_origin_max[1] + centroid_distance*cos((90 - rotation) * pi/180))
+    int_end_max = (int_origin_max[0] + (sign*centroid_distance)*sin((90 - rotation) * pi/180),
+               int_origin_max[1] + (sign*centroid_distance)*cos((90 - rotation) * pi/180))
     # Determine interaction endpoint
     int_end_x = (int_end_max[0] + (y_pad+parameters['receiving_length_skew'])*sin((180-rotation) * pi/180))
     int_end_y = (int_end_max[1] + (y_pad+parameters['receiving_length_skew'])*cos((180-rotation) * pi/180))

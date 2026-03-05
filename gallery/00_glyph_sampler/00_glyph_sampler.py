@@ -1,6 +1,7 @@
 """
 Displays all parametric SBOL Visual glyphs within the glyphs directory.
 """
+
 import parasbolv as psv
 import matplotlib.pyplot as plt
 
